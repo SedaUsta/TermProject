@@ -102,7 +102,10 @@ public class Level {
 					double y2 = Double.parseDouble(array[4]);
 
 					TrafficLight trafficLight = new TrafficLight(x1, y1, x2, y2);
-					pane.getChildren().addAll(trafficLight.getPane());
+					trafficLight.getCircle().setOnMouseClicked(event -> {
+						trafficLight.setState();
+					});
+					pane.getChildren().addAll(trafficLight.getLine(), trafficLight.getCircle());
 					trafficLights.add(trafficLight);
 				}
 
@@ -134,17 +137,12 @@ public class Level {
 		} catch (Exception e) {
 
 		}
+
 		String textString = "Score: " + score + "/" + numberOfCars + "\nCrashes: " + crashes + "/" + allowedAccidents;
 		Text text1 = new Text(width / 400, height / 40, textString);
 		text1.setFont(Font.font("Times New Roman", FontWeight.BOLD, FontPosture.REGULAR, height / 40));
 		pane.getChildren().add(text1);
 
-		for (int i = 0; i < trafficLights.size(); i++) {
-			int number = i;
-			trafficLights.get(i).getCircle().setOnMouseClicked(event -> {
-				trafficLights.get(number).setState();
-			});
-		}
 	}
 
 	public Scene getScene() {
