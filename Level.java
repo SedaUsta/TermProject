@@ -14,12 +14,19 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
+//import javafx.util.Duration;
+import javafx.animation.PathTransition;
+//import javafx.animation.Timeline;
+
+
 
 public class Level {
 	private ObservableList<TrafficLight> trafficLights;
 	private ObservableList<Building> buildings;
 	private ObservableList<RoadTile> roadTiles;
 	private ObservableList<Path> paths;
+	private ObservableList<PathTransition> pathTransitions;
+	//private int pathLengths;
 
 	private Scene scene;
 	private Pane pane;
@@ -34,6 +41,9 @@ public class Level {
 	private int score;
 	private int allowedAccidents;
 	private int crashes;
+	
+	String textString ;
+	Text text1;
 
 	public Level(String name) {
 		pane = new Pane();
@@ -114,12 +124,23 @@ public class Level {
 					double y = Double.parseDouble(array[4]);
 
 					Path path = new Path();
+					
+					/*PathTransition pt = new PathTransition();
+					pt.setDuration(Duration.millis(4000));
+				    pt.setPath(path);*/
+					
 					MoveTo moveTo = new MoveTo();
 					moveTo.setX(x);
 					moveTo.setY(y);
 					path.getElements().add(moveTo);
 
 					paths.add(Integer.parseInt(array[1]), path);
+					//pathTransitions.add(Integer.parseInt(array[1]), pt);
+					
+					/*pt.setCycleCount(Timeline.INDEFINITE);
+				    pt.setAutoReverse(false);*/
+					
+					//this.numberOfPaths++;
 				}
 
 				else if (array[0].equalsIgnoreCase("Path") && array[2].equalsIgnoreCase("LineTo")) {
@@ -130,6 +151,10 @@ public class Level {
 					lineTo.setX(x);
 					lineTo.setY(y);
 					paths.get(Integer.parseInt(array[1])).getElements().add(lineTo);
+					//int lastIndex = paths.get(Integer.parseInt(array[1])).getElements().lastIndexOf(lineTo);
+					
+					
+					
 				}
 
 			}
@@ -138,8 +163,8 @@ public class Level {
 
 		}
 
-		String textString = "Score: " + score + "/" + numberOfCars + "\nCrashes: " + crashes + "/" + allowedAccidents;
-		Text text1 = new Text(width / 400, height / 40, textString);
+		 textString = "Score: " + score + "/" + numberOfCars + "\nCrashes: " + crashes + "/" + allowedAccidents;
+		 text1 = new Text(width / 400, height / 40, textString);
 		text1.setFont(Font.font("Times New Roman", FontWeight.BOLD, FontPosture.REGULAR, height / 40));
 		pane.getChildren().add(text1);
 
@@ -147,5 +172,58 @@ public class Level {
 
 	public Scene getScene() {
 		return scene;
+	}
+	public void removeText() {
+		pane.getChildren().remove(text1);
+	}
+	public void setText() {
+		 textString = "Score: " + score + "/" + numberOfCars + "\nCrashes: " + crashes + "/" + allowedAccidents;
+		 text1 = new Text(width / 400, height / 40, textString);
+		text1.setFont(Font.font("Times New Roman", FontWeight.BOLD, FontPosture.REGULAR, height / 40));
+		pane.getChildren().add(text1);
+	}
+	
+	public int getNumberOfPaths() {
+		return numberOfPaths;
+	}
+	
+	public ObservableList<Path> getPaths(){
+		return this.paths;
+	}
+	public ObservableList<PathTransition> getPathTransitions(){
+		return this.pathTransitions;
+	}
+	public ObservableList<TrafficLight> getTrafficLights(){
+		return this.trafficLights;
+	}
+	public Pane getPane() {
+		return this.pane;
+	}
+	public void setCrushes(int s) {
+		this.crashes=s;
+	}
+	public int getCrushes () {
+		return crashes;
+	}
+	public void upCrashes() {
+		crashes++;
+	}
+	public void upScore() {
+		this.score++;
+	}
+	public int getScores() {
+		return score;
+	}
+	public int getNumberOfCars() {
+		return this.numberOfCars;
+	}
+	public int getAllowedAccidents() {
+		return this.allowedAccidents;
+	}
+	public double getWidth() {
+		return this.width;
+	}
+	public double getHeight() {
+		return this.height;
 	}
 }
