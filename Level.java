@@ -1,4 +1,5 @@
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 import javafx.collections.FXCollections;
@@ -17,7 +18,7 @@ import javafx.scene.text.Text;
 //import javafx.util.Duration;
 import javafx.animation.PathTransition;
 //import javafx.animation.Timeline;
-
+import javafx.scene.shape.Shape;
 
 
 public class Level {
@@ -44,6 +45,20 @@ public class Level {
 	
 	String textString ;
 	Text text1;
+	
+	
+	
+	//in order to calculate path length
+	private ArrayList<Double> firstXPositionLists = new ArrayList<Double>();
+	private ArrayList<Double> firstYPositionLists= new ArrayList<Double>();
+	private ArrayList<Double> XPositionLists = new ArrayList<Double>();
+	private ArrayList<Double> YPositionLists= new ArrayList<Double>();
+	private ArrayList<Double> pathLengths= new ArrayList<Double>();
+	
+	
+	//add these in order to classify traffic lights
+	private ArrayList<ObservableList<TrafficLight>> trafficLightsLists= new ArrayList<ObservableList<TrafficLight>>();
+	
 
 	public Level(String name) {
 		pane = new Pane();
@@ -68,6 +83,14 @@ public class Level {
 					numberOfPaths = Integer.parseInt(array[5]);
 					numberOfCars = Integer.parseInt(array[6]);
 					allowedAccidents = Integer.parseInt(array[7]);
+					
+					
+					//create pathLengths list
+					for(int i=0;i<this.numberOfPaths;i++) {
+						pathLengths.add((double)0);
+					 }
+					
+					
 
 					double gridWidth = width / xGridCells;
 					double gridHeight = height / yGridCells;
@@ -122,6 +145,14 @@ public class Level {
 				else if (array[0].equalsIgnoreCase("Path") && array[2].equalsIgnoreCase("MoveTo")) {
 					double x = Double.parseDouble(array[3]);
 					double y = Double.parseDouble(array[4]);
+					
+					
+					
+					firstXPositionLists.add(Integer.parseInt(array[1]),x);
+					firstYPositionLists.add(Integer.parseInt(array[1]),y);
+					
+					XPositionLists.add(Integer.parseInt(array[1]),x);
+					YPositionLists.add(Integer.parseInt(array[1]),y);
 
 					Path path = new Path();
 					
@@ -152,8 +183,16 @@ public class Level {
 					lineTo.setY(y);
 					paths.get(Integer.parseInt(array[1])).getElements().add(lineTo);
 					//int lastIndex = paths.get(Integer.parseInt(array[1])).getElements().lastIndexOf(lineTo);
-					
-					
+					//to determine total lengths of paths
+					double x1 = XPositionLists.get(Integer.parseInt(array[1]));
+					double y1 = YPositionLists.get(Integer.parseInt(array[1]));
+					double totalLength=0;
+					if(!(pathLengths.isEmpty())) {
+					totalLength+=pathLengths.get(Integer.parseInt(array[1]));
+					pathLengths.remove(Integer.parseInt(array[1]));
+					}
+					totalLength+=Math.sqrt((x-x1)*(x-x1)+(y-y1)*(y-y1));
+					pathLengths.add(Integer.parseInt(array[1]),totalLength);
 					
 				}
 
@@ -162,12 +201,45 @@ public class Level {
 		} catch (Exception e) {
 
 		}
+		
+		
+		
+		groupTrafficLigths();
 
 		 textString = "Score: " + score + "/" + numberOfCars + "\nCrashes: " + crashes + "/" + allowedAccidents;
 		 text1 = new Text(width / 400, height / 40, textString);
 		text1.setFont(Font.font("Times New Roman", FontWeight.BOLD, FontPosture.REGULAR, height / 40));
 		pane.getChildren().add(text1);
 
+	}
+	
+	public void groupTrafficLigths() {
+		for(int i=0;i<this.numberOfPaths;i++) {
+			trafficLightsLists.add(FXCollections.observableArrayList());
+		 }
+		//this.paths;
+		//this.trafficLights
+		for(int i=0;i<trafficLights.size();i++) {
+			for(int j=0;j<paths.size();j++) {
+			
+			
+			Shape intersection = Shape.intersect(trafficLights.get(i).getCircle(), paths.get(j));
+	       
+	    
+			
+			if(intersection.getBoundsInLocal().getWidth() != -1) {
+				System.out.println("trafficLights["+i+"] is intersects with path["+j+"]");
+				//System.out.println("path("+j+") bounds in parent: "+paths.get(j).getBoundsInParent());
+				//System.out.println("traffic light("+i+") bounds in parent: "+trafficLights.get(i).getCircle().getBoundsInLocal());
+				trafficLightsLists.get(j).add(trafficLights.get(i));
+				
+				break;
+			}
+			}
+			
+			
+		}
+		
 	}
 
 	public Scene getScene() {
@@ -226,4 +298,17 @@ public class Level {
 	public double getHeight() {
 		return this.height;
 	}
+	public ArrayList<Double> getPathLengths(){
+		return pathLengths;
+	}
+	public ArrayList<Double> getPathBeginPointsX(){
+		return this.firstXPositionLists;
+	}
+	public ArrayList<Double> getPathBeginPointsY(){
+		return this.firstYPositionLists;
+	}
+	public ArrayList<ObservableList<TrafficLight>> getGroupedTrafficLightsList(){
+		return trafficLightsLists;
+	}
 }
+
