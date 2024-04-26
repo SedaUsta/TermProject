@@ -34,11 +34,20 @@ import javafx.geometry.Bounds;
 
 public class Test extends Application {
 	
-	public double safeCrushTime=50;
+	public double safeCrushTime=80;
 	public double safeDistance = 40;
-	public double crushDistance=0.0000000000000000000000089;
+	public double crushDistance=20;
+	public double carSpeed=0.4;
+	
 	public static double time=0;
+	
+	
+	
 	static Level level;static int levelCounter = 1;
+	
+	
+	
+	
 	ArrayList<ObservableList<Car>> carLists; //= new ArrayList<ObservableList<Car>>(level.getNumberOfPaths());
 	ArrayList<ArrayList<Double>> carXPositionLists; //= new ArrayList<ArrayList<Double>>(level.getNumberOfPaths());
 	ArrayList<ArrayList<Double>> carYPositionLists; //= new ArrayList<ArrayList<Double>> (level.getNumberOfPaths()) ;
@@ -85,7 +94,7 @@ public class Test extends Application {
 		 for(int i=0;i<level.getNumberOfPaths();i++) {
 			 trafficLightLists.add(FXCollections.observableArrayList());
 		 }
-		 for(int i=0;i<level.getNumberOfPaths();i++) {
+		 /*for(int i=0;i<level.getNumberOfPaths();i++) {
 			 
 			 for(int j=0;j<level.getTrafficLights().size();j++) {
 				// checks if the traffic light is on that path
@@ -98,7 +107,7 @@ public class Test extends Application {
 			 }
 			 
 		 
-		 }
+		 }*/
 		 
 
 			primaryStage.setScene(level.getScene());
@@ -263,29 +272,34 @@ public class Test extends Application {
 		// car movement, crush and stop
 		// check if there are crushes first
 		for(int i=carLists.size()-1;i>=0;i--) {
-			
-			if(!(carLists.get(i).isEmpty())) {
+			//System.out.println("got in i");
+			/*if(!(carLists.get(i).isEmpty())) {
 				//check for traffic light
-				continue;
+				System.out.println("got in isEmpty");
 				
-			}
+				
+			}*/
 			
-			for(int j=carLists.get(i).size();j>=1;j--) {
-				
+			for(int j=carLists.get(i).size()-1;j>=1;j--) {
+				//System.out.println("got in j");
+				boolean isBreak=false;
 				if(carLists.get(i).get(j).getState().equals("moving")) {
-					
+					//System.out.println(" if moving");
 					for(int a=0;a<carLists.size();a++) {
-	        			
+						if(a==i) {
+							continue;
+						}
+						//System.out.println("got in a");
 						for (int b=0;b<carLists.get(a).size();b++) {
-							
-							
+							//System.out.println("got in b");
+							/*System.out.println("got in a,b");
 							Bounds bounds1 = carLists.get(a).get(b).getCar().getBoundsInLocal();
 		    		        Bounds screenBounds1 = carLists.get(a).get(b).getCar().localToScene(bounds1);
 		    		        double xa =  screenBounds1.getCenterX();
 		    		        double ya =  screenBounds1.getCenterY();
 		    		        
 		    		        Bounds bounds = carLists.get(i).get(j).getCar().getBoundsInLocal();
-		    		        Bounds screenBounds = carLists.get(i).get(j).getCar().localToScene(bounds);
+		                    Bounds screenBounds = carLists.get(i).get(j).getCar().localToScene(bounds);
 		    		        double x1 =  screenBounds.getCenterX();
 		    		        double y1 =  screenBounds.getCenterY();
 		    		        
@@ -293,26 +307,106 @@ public class Test extends Application {
 		    		        double distance = Math.sqrt((x1-xa)*(x1-xa)+(y1-ya)*(y1-ya));
 		    		       
 							if(distance<this.crushDistance) {
+								System.out.println("got crushed");
 							carLists.get(i).get(j).setState("crushed");
 						carLists.get(a).get(b).setState("crushed");
 						pathTransitions.get(i).get(j).pause();
 						pathTransitions.get(a).get(b).pause();
 						level.upCrashes(); level.removeText();level.setText();
 						break;
-						}/*
+						}*/
 							
-							Shape intersect = Shape.intersect(carLists.get(i).get(j).getCar(), carLists.get(a).get(b).getCar());
-		    		        intersect.getBoundsInLocal().getWidth() != -1
-					if(carLists.get(i).get(j).getCar().intersects(carLists.get(a).get(b).getCar().getBoundsInLocal())) {
+							//Shape intersect = Shape.intersect(carLists.get(i).get(j).getCar(), carLists.get(a).get(b).getCar());
+		    		        //intersect.getBoundsInLocal().getWidth() != -1
+							
+							/*Bounds bounds1 = carLists.get(a).get(b).getCar().getBoundsInLocal();
+		    		        Bounds screenBounds1 = carLists.get(a).get(b).getCar().localToScene(bounds1);
+		    		        double xa =  screenBounds1.getCenterX();
+		    		        double ya =  screenBounds1.getCenterY();
+		    		        
+		    		        Bounds bounds2 = carLists.get(i).get(j).getCar().getBoundsInLocal();
+		                    Bounds screenBounds2 = carLists.get(i).get(j).getCar().localToScene(bounds2);
+		    		        double x1 =  screenBounds2.getCenterX();
+		    		        double y1 =  screenBounds2.getCenterY();
+							
+							Bounds bounds = carLists.get(a).get(b).getCar().getBoundsInParent();
+		    		        Bounds screenBounds = carLists.get(a).get(b).getCar().localToScene(bounds);
+		    		        Bounds bounds3 = carLists.get(i).get(j).getCar().getBoundsInParent();
+		    		        
+		    		        carLists.get(a).get(b).getCar().setTranslateX(xa);
+		    		        carLists.get(a).get(b).getCar().setTranslateY(ya);
+		    		        carLists.get(i).get(j).getCar().setTranslateX(x1);
+		    		        carLists.get(i).get(j).getCar().setTranslateY(y1);
+		    		        
+							carLists.get(i).get(j).getCar().intersects(carLists.get(i).get(j).getCar().sceneToLocal(screenBounds));
+					if(bounds3.intersects(bounds)) {
+					System.out.println("got crushed");
 						carLists.get(i).get(j).setState("crushed");
 						carLists.get(a).get(b).setState("crushed");
 						pathTransitions.get(i).get(j).pause();
+						
+						
+						
+						
 						pathTransitions.get(a).get(b).pause();
 						level.upCrashes(); level.removeText();level.setText();
 						break;
 					}*/
+							
+							
+							
+							/*
+							double x1 = this.carLists.get(i).get(j).getCar().getTranslateX();
+				            double y1 = this.carLists.get(i).get(j).getCar().getTranslateY();
+
+				            double x2 = this.carLists.get(a).get(b).getCar().getTranslateX();
+				            double y2 = this.carLists.get(a).get(b).getCar().getTranslateY();*/
+							Bounds bounds = carLists.get(i).get(j).getCar().getBoundsInLocal();
+					        Bounds screenBounds = carLists.get(i).get(j).getCar().localToScene(bounds);
+					        double x1 =  screenBounds.getCenterX();
+					        double y1 =  screenBounds.getCenterY();
+					        Bounds bounds1 = carLists.get(a).get(b).getCar().getBoundsInLocal();
+					        Bounds screenBounds1 = carLists.get(a).get(b).getCar().localToScene(bounds1);
+					        double x2 =  screenBounds1.getCenterX();
+					        double y2 =  screenBounds1.getCenterY();
+				            //System.out.println(" i = " + i +", j = " + j+", a = " + a+", b = " + b);
+				            //System.out.println(" x1 = " + x1 +", y1 = " + y1+", x2 = " + x2+", y2 = " + y2);
+				            
+				            double distance = Math.sqrt((x1-x2)*(x1-x2)+(y1-y2)*(y1-y2));
+				            
+				            //System.out.println("Distance: " + distance);
+
+				            if (distance<this.crushDistance) {
+				                //System.out.println("Intersection detected at i = " + i +", j = " + j+", a = " + a+", b = " + b);
+				                
+				                
+				                carLists.get(i).get(j).setState("crushed");
+								carLists.get(a).get(b).setState("crushed");
+								pathTransitions.get(i).get(j).pause();
+								pathTransitions.get(a).get(b).pause();
+								
+								/*pathTransitions.get(i).remove(j);
+								carXPositionLists.get(i).remove(j);
+								carYPositionLists.get(i).remove(j);
+								level.getPane().getChildren().remove(carLists.get(i).get(j).getCar());
+								carLists.get(i).remove(j);
+								
+								pathTransitions.get(a).remove(b);
+								carXPositionLists.get(a).remove(b);
+								carYPositionLists.get(a).remove(b);
+								level.getPane().getChildren().remove(carLists.get(a).get(b).getCar());
+								carLists.get(a).remove(b);
+								*/
+								
+								
+								level.upCrashes(); level.removeText();level.setText();
+								isBreak = true;
+								break;
+				            }
+				            
 				  }
-				 	
+				 	if(isBreak)
+				 		break;
 				}
 					
 				}
@@ -320,39 +414,141 @@ public class Test extends Application {
 				
 				
 			}
-		  }		
+		  }	
+		// check crush statement
+		for(int i=carLists.size()-1;i>=0;i--) {
+			for(int j=carLists.get(i).size()-1;j>=0;j--) {
+				if(carLists.get(i).get(j).getState().equals("crushed")) {
+					if(j==0) {
+						if(carLists.get(i).get(j).getCrushTime()>this.safeCrushTime) {
+							
+							pathTransitions.get(i).remove(j);
+							carXPositionLists.get(i).remove(j);
+							carYPositionLists.get(i).remove(j);
+							level.getPane().getChildren().remove(carLists.get(i).get(j).getCar());
+							carLists.get(i).remove(j);
+							
+						
+						}else
+								carLists.get(i).get(j).updateCrushTime();
+					}else if(carLists.get(i).get(j).getCrushTime()>this.safeCrushTime) {
+						
+						pathTransitions.get(i).remove(j);
+						carXPositionLists.get(i).remove(j);
+						carYPositionLists.get(i).remove(j);
+						level.getPane().getChildren().remove(carLists.get(i).get(j).getCar());
+						carLists.get(i).remove(j);
+						
+					
+					}else
+							carLists.get(i).get(j).updateCrushTime();
+					        pathTransitions.get(i).get(j).pause();
+					        System.out.println("Paused");
+					
+				}
+			}
+			
+		}
 		
 		//check if they need to stop
+		
+		
+		//check traffic light
 		for(int i=carLists.size()-1;i>=0;i--) {
 			for(int j=carLists.get(i).size()-1;j>=1;j--) {
 				
-				//check the front car
+				if(carLists.get(i).get(j).getState().equals("moving")) {
+					
+					level.getGroupedTrafficLightsList().get(i).size();
+					for(int k=0;k<level.getGroupedTrafficLightsList().get(i).size();k++) {
+						
+						if(!(level.getGroupedTrafficLightsList().get(i).get(k).getState())) {
+							//check the distance between the car and the light
+							Bounds bounds = carLists.get(i).get(j).getCar().getBoundsInLocal();
+					        Bounds screenBounds = carLists.get(i).get(j).getCar().localToScene(bounds);
+					        double x1 =  screenBounds.getCenterX();
+					        double y1 =  screenBounds.getCenterY();
+					        
+					        
+					        /*Bounds bounds1 = level.getGroupedTrafficLightsList().get(i).get(k).getCircle().getBoundsInLocal();
+					        Bounds screenBounds1 = level.getGroupedTrafficLightsList().get(i).get(k).getCircle().localToScene(bounds1);
+					        double x2 =  screenBounds1.getCenterX();
+					        double y2 =  screenBounds1.getCenterY();*/
+					        double x2 = (level.getGroupedTrafficLightsList().get(i).get(k).getX1()+level.getGroupedTrafficLightsList().get(i).get(k).getX2())/2 ;
+					        double y2 =  (level.getGroupedTrafficLightsList().get(i).get(k).getY1()+level.getGroupedTrafficLightsList().get(i).get(k).getY2())/2;
+					        
+					        
+					        double distance = Math.sqrt((x1-x2)*(x1-x2)+(y1-y2)*(y1-y2));
+							
+				            if (distance<this.safeDistance) {
+				            	
+				            	carLists.get(i).get(j).setState("stopped");
+								pathTransitions.get(i).get(j).pause();
+				            	
+				            }
+							
+							
+						}
+						
+					}
+					
+					
+					
+				}
+				
+			}
+		}
+		
+		
+		
+		//check the front car
+		for(int i=carLists.size()-1;i>=0;i--) {
+			for(int j=carLists.get(i).size()-1;j>=1;j--) {
+				
+				
 				
 				if(carLists.get(i).get(j).getState().equals("moving")) {
 					
-					if(carLists.get(i).get(j-1).getState().equals("stopped")) {
+					if(carLists.get(i).get(j-1).getState().equals("stopped")||carLists.get(i).get(j-1).getState().equals("crushed")) {
+						
+						//check the distance between the cars
+						Bounds bounds = carLists.get(i).get(j).getCar().getBoundsInLocal();
+				        Bounds screenBounds = carLists.get(i).get(j).getCar().localToScene(bounds);
+				        double x1 =  screenBounds.getCenterX();
+				        double y1 =  screenBounds.getCenterY();
+				        Bounds bounds1 = carLists.get(i).get(j-1).getCar().getBoundsInLocal();
+				        Bounds screenBounds1 = carLists.get(i).get(j-1).getCar().localToScene(bounds1);
+				        double x2 =  screenBounds1.getCenterX();
+				        double y2 =  screenBounds1.getCenterY();
+			            double distance = Math.sqrt((x1-x2)*(x1-x2)+(y1-y2)*(y1-y2));
+						
+			            if (distance<this.safeDistance) {
+						
 						carLists.get(i).get(j).setState("stopped");
 						pathTransitions.get(i).get(j).pause();
-						
-					}
+						}
+					} 
 				
 				
 				}
-				//check traffic light
+				
 			}
 		}
 		//check if they need to move
 				for(int i=carLists.size()-1;i>=0;i--) {
-					for(int j=carLists.get(i).size()-1;j>=1;j--) {
+					for(int j=carLists.get(i).size()-1;j>=0;j--) {
 						
 						//check the front car
 						if(carLists.get(i).get(j).getState().equals("stopped")) {
 							
-							if(carLists.get(i).get(j-1).getState().equals("moving")) {
+							if(j==0) {
 								//check traffic light with if
 								carLists.get(i).get(j).setState("moving");
 								pathTransitions.get(i).get(j).play();
 								
+							} else if(carLists.get(i).get(j-1).getState().equals("moving")) {
+								carLists.get(i).get(j).setState("moving");
+								pathTransitions.get(i).get(j).play();
 							}
 						
 						
@@ -385,8 +581,8 @@ public class Test extends Application {
 						if(pathTransitions.get(i).get(j).getCurrentTime().greaterThanOrEqualTo(Duration.millis(2000))) {
 							//pathTransitions.get(i).get(j).pause();
 						}
-				System.out.print("x:"+ x+"  y:" +y );
-				System.out.println();
+				//System.out.print("x:"+ x+"  y:" +y );
+				//System.out.println();
 				}
 			}    
 			        
@@ -419,10 +615,7 @@ public class Test extends Application {
 		    } 
 		    time = 0; 
 		  } 
-	  }/*if(true) {
-			    System.out.print("X:"+carXPositionLists.get(0).get(0)+"  Y:");      
-		        System.out.println(carYPositionLists.get(0).get(0));
-			    }*/
+	  }
 	
 	
 
@@ -444,7 +637,8 @@ public class Test extends Application {
 				PathTransition pt = new PathTransition();
 				
 				//sets the speed
-			    pt.setDuration(Duration.millis(4000));
+				double length = level.getPathLengths().get(pathNumber);
+			    pt.setDuration(Duration.millis(length/this.carSpeed));
 			    
 			    //adds the path
 			    pt.setPath(level.getPaths().get(pathNumber)); //level.getPaths().get(pathNumber);
@@ -497,18 +691,18 @@ public class Test extends Application {
 			if(!(carLists.get(pathNumber).isEmpty())) {
 			Car car = carLists.get(pathNumber).get(carLists.get(pathNumber).size()-1);
 			Bounds bounds = car.getCar().getBoundsInLocal();
-	        Bounds screenBounds = car.getCar().localToScreen(bounds);
+	        Bounds screenBounds = car.getCar().localToScene(bounds);
 	        double x =  screenBounds.getCenterX();
 	        double y =  screenBounds.getCenterY();
-	        double x1 = carXPositionLists.get(pathNumber).get(carXPositionLists.get(pathNumber).size()-1);
-	        double y1 = carYPositionLists.get(pathNumber).get(carYPositionLists.get(pathNumber).size()-1);
+	        double x1 = level.getPathBeginPointsX().get(pathNumber);
+	        double y1 = level.getPathBeginPointsY().get(pathNumber);
 	        
 	        //level.getPaths().get(pathNumber).getElements().
 	        
 	        double distance = Math.sqrt((x-x1)*(x-x1)+(y-y1)*(y-y1)) ;
 			
 			if(distance<this.safeDistance) {
-				
+				//System.out.println("isFree is setted to false");
 				isFree=false;
 			}
 			
