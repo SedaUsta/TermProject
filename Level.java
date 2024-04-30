@@ -1,7 +1,6 @@
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Scanner;
-
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.Scene;
@@ -15,9 +14,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
-//import javafx.util.Duration;
 import javafx.animation.PathTransition;
-//import javafx.animation.Timeline;
 import javafx.scene.shape.Shape;
 
 
@@ -27,7 +24,7 @@ public class Level {
 	private ObservableList<RoadTile> roadTiles;
 	private ObservableList<Path> paths;
 	private ObservableList<PathTransition> pathTransitions;
-	//private int pathLengths;
+	
 
 	private Scene scene;
 	private Pane pane;
@@ -38,7 +35,7 @@ public class Level {
 	private int yGridCells;
 	private int numberOfPaths;
 
-	private int numberOfCars;
+	private int winScore;
 	private int score;
 	private int allowedAccidents;
 	private int crashes;
@@ -81,7 +78,7 @@ public class Level {
 					xGridCells = Integer.parseInt(array[3]);
 					yGridCells = Integer.parseInt(array[4]);
 					numberOfPaths = Integer.parseInt(array[5]);
-					numberOfCars = Integer.parseInt(array[6]);
+					winScore = Integer.parseInt(array[6]);
 					allowedAccidents = Integer.parseInt(array[7]);
 					
 					
@@ -98,8 +95,8 @@ public class Level {
 					for (int i = 0; i < yGridCells; i++) {
 						for (int j = 0; j < xGridCells; j++) {
 							Rectangle gridCell = new Rectangle(i * gridWidth, j * gridHeight, gridWidth, gridHeight);
-							gridCell.setStroke(Color.BLACK);
-							gridCell.setFill(Color.MEDIUMTURQUOISE);
+							gridCell.setStroke(Color.WHITE);
+							gridCell.setFill(Color.SANDYBROWN);
 
 							pane.getChildren().add(gridCell);
 						}
@@ -147,7 +144,7 @@ public class Level {
 					double y = Double.parseDouble(array[4]);
 					
 					
-					
+					//bütün pathlerin ilk x y noktalarını isCarSpawnPointFree methodunda kullanmak için saklıyoruz
 					firstXPositionLists.add(Integer.parseInt(array[1]),x);
 					firstYPositionLists.add(Integer.parseInt(array[1]),y);
 					
@@ -156,22 +153,13 @@ public class Level {
 
 					Path path = new Path();
 					
-					/*PathTransition pt = new PathTransition();
-					pt.setDuration(Duration.millis(4000));
-				    pt.setPath(path);*/
-					
 					MoveTo moveTo = new MoveTo();
 					moveTo.setX(x);
 					moveTo.setY(y);
 					path.getElements().add(moveTo);
 
 					paths.add(Integer.parseInt(array[1]), path);
-					//pathTransitions.add(Integer.parseInt(array[1]), pt);
 					
-					/*pt.setCycleCount(Timeline.INDEFINITE);
-				    pt.setAutoReverse(false);*/
-					
-					//this.numberOfPaths++;
 				}
 
 				else if (array[0].equalsIgnoreCase("Path") && array[2].equalsIgnoreCase("LineTo")) {
@@ -181,7 +169,10 @@ public class Level {
 					LineTo lineTo = new LineTo();
 					lineTo.setX(x);
 					lineTo.setY(y);
+					
 					paths.get(Integer.parseInt(array[1])).getElements().add(lineTo);
+					
+					
 					//int lastIndex = paths.get(Integer.parseInt(array[1])).getElements().lastIndexOf(lineTo);
 					//to determine total lengths of paths
 					double x1 = XPositionLists.get(Integer.parseInt(array[1]));
@@ -206,7 +197,7 @@ public class Level {
 		
 		groupTrafficLigths();
 
-		 textString = "Score: " + score + "/" + numberOfCars + "\nCrashes: " + crashes + "/" + allowedAccidents;
+		 textString = "Score: " + score + "/" + winScore + "\nCrashes: " + crashes + "/" + allowedAccidents;
 		 text1 = new Text(width / 400, height / 40, textString);
 		text1.setFont(Font.font("Times New Roman", FontWeight.BOLD, FontPosture.REGULAR, height / 40));
 		pane.getChildren().add(text1);
@@ -217,8 +208,7 @@ public class Level {
 		for(int i=0;i<this.numberOfPaths;i++) {
 			trafficLightsLists.add(FXCollections.observableArrayList());
 		 }
-		//this.paths;
-		//this.trafficLights
+		
 		for(int i=0;i<trafficLights.size();i++) {
 			for(int j=0;j<paths.size();j++) {
 			
@@ -229,11 +219,9 @@ public class Level {
 			
 			if(intersection.getBoundsInLocal().getWidth() != -1) {
 				System.out.println("trafficLights["+i+"] is intersects with path["+j+"]");
-				//System.out.println("path("+j+") bounds in parent: "+paths.get(j).getBoundsInParent());
-				//System.out.println("traffic light("+i+") bounds in parent: "+trafficLights.get(i).getCircle().getBoundsInLocal());
+				
 				trafficLightsLists.get(j).add(trafficLights.get(i));
 				
-				break;
 			}
 			}
 			
@@ -249,7 +237,7 @@ public class Level {
 		pane.getChildren().remove(text1);
 	}
 	public void setText() {
-		 textString = "Score: " + score + "/" + numberOfCars + "\nCrashes: " + crashes + "/" + allowedAccidents;
+		 textString = "Score: " + score + "/" + winScore + "\nCrashes: " + crashes + "/" + allowedAccidents;
 		 text1 = new Text(width / 400, height / 40, textString);
 		text1.setFont(Font.font("Times New Roman", FontWeight.BOLD, FontPosture.REGULAR, height / 40));
 		pane.getChildren().add(text1);
@@ -271,23 +259,18 @@ public class Level {
 	public Pane getPane() {
 		return this.pane;
 	}
-	public void setCrushes(int s) {
-		this.crashes=s;
-	}
-	public int getCrushes () {
-		return crashes;
-	}
+	
 	public void upCrashes() {
 		crashes++;
 	}
 	public void upScore() {
 		this.score++;
 	}
-	public int getScores() {
+	public int getScore() {
 		return score;
 	}
-	public int getNumberOfCars() {
-		return this.numberOfCars;
+	public int getWinScore() {
+		return this.winScore;
 	}
 	public int getAllowedAccidents() {
 		return this.allowedAccidents;
@@ -301,6 +284,66 @@ public class Level {
 	public ArrayList<Double> getPathLengths(){
 		return pathLengths;
 	}
+	public int getCrashes() {
+		return crashes;
+	}
+
+	public void setCrashes(int crashes) {
+		this.crashes = crashes;
+	}
+
+	public void setTrafficLights(ObservableList<TrafficLight> trafficLights) {
+		this.trafficLights = trafficLights;
+	}
+
+	public void setBuildings(ObservableList<Building> buildings) {
+		this.buildings = buildings;
+	}
+
+	public void setWidth(double width) {
+		this.width = width;
+	}
+
+	public void setxGridCells(int xGridCells) {
+		this.xGridCells = xGridCells;
+	}
+
+	public void setyGridCells(int yGridCells) {
+		this.yGridCells = yGridCells;
+	}
+
+	public void setWinScore(int winScore) {
+		this.winScore = winScore;
+	}
+
+	public void setScore(int score) {
+		this.score = score;
+	}
+
+	public void setAllowedAccidents(int allowedAccidents) {
+		this.allowedAccidents = allowedAccidents;
+	}
+
+	public void setTextString(String textString) {
+		this.textString = textString;
+	}
+
+	public void setText1(Text text1) {
+		this.text1 = text1;
+	}
+
+	public void setXPositionLists(ArrayList<Double> xPositionLists) {
+		XPositionLists = xPositionLists;
+	}
+
+	public void setYPositionLists(ArrayList<Double> yPositionLists) {
+		YPositionLists = yPositionLists;
+	}
+
+	public void setTrafficLightsLists(ArrayList<ObservableList<TrafficLight>> trafficLightsLists) {
+		this.trafficLightsLists = trafficLightsLists;
+	}
+
 	public ArrayList<Double> getPathBeginPointsX(){
 		return this.firstXPositionLists;
 	}
@@ -311,4 +354,3 @@ public class Level {
 		return trafficLightsLists;
 	}
 }
-
