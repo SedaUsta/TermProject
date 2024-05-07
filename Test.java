@@ -11,31 +11,33 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
 import javafx.scene.paint.Color;
-//import javafx.scene.image.ImageView;
+import javafx.scene.image.ImageView;
 import javafx.scene.image.Image;
 import javafx.geometry.Insets;
 import javafx.scene.layout.*;
 import javafx.scene.control.Button;
-
 import java.util.*;
 import javafx.geometry.Bounds;
 
 
 public class Test extends Application {
 	
-	public double safeCrushTime=200;
-	public double safeDistance = 30;
-	public double safeLightDistance = 20;
-	public double crushDistance=20;
-	public double carSpeed=0.5;
+	private double safeCrushTime=200;
+	private double safeDistance = 30;
+	private double safeLightDistance = 20;
+	private int distanceForSetOnMovingMethod = 20;
+	private double crushDistance=20;
+	private double carSpeed=0.7;
+	private double standardDistance = 10.0;
 	
-	public static double time=0;
-	static Level level;static int levelCounter = 1;public static int result=2;
+	private double time=0;
+	private Level level;
+	private int levelCounter = 1;
 	
-	ArrayList<ObservableList<Car>> carLists; 
-	ArrayList<ArrayList<Double>> carXPositionLists; 
-	ArrayList<ArrayList<Double>> carYPositionLists; 
-	ArrayList<ObservableList<TrafficLight>> trafficLightLists;
+	private ArrayList<ObservableList<Car>> carLists; 
+	private ArrayList<ArrayList<Double>> carXPositionLists; 
+	private ArrayList<ArrayList<Double>> carYPositionLists; 
+	private ArrayList<ObservableList<TrafficLight>> trafficLightLists;
 	//stages(only a single stage) and scenes we use
 	private Stage stage;
 	
@@ -89,12 +91,12 @@ public class Test extends Application {
 		
 		
 		paneMainMenu = new Pane();
-		mainMenu = new Scene(paneMainMenu,1200,600);
+		mainMenu = new Scene(paneMainMenu,1380,460);
 		
 		
 		Image image = new Image("Entrance1.jpg");
 		
-		BackgroundImage backgroundImage = new BackgroundImage(
+		/*BackgroundImage backgroundImage = new BackgroundImage(
 				image,
 				BackgroundRepeat.NO_REPEAT,
 				BackgroundRepeat.NO_REPEAT,
@@ -102,19 +104,21 @@ public class Test extends Application {
 				new BackgroundSize(100,100,true,true,true,true)
 				);
 		Background bg = new Background(backgroundImage);
-		paneMainMenu.setBackground(bg);
+		paneMainMenu.setBackground(bg);*/
 		
-		/*-
+		
 		ImageView entrance = new ImageView(image);
-		entrance.setFitHeight(600);
-		entrance.setFitWidth(1200);
-		paneMainMenu.getChildren().add(entrance);*/
+		entrance.setFitHeight(460);
+		entrance.setFitWidth(1380);
+		entrance.layoutXProperty().bind(mainMenu.widthProperty().subtract(entrance.prefWidth(-1)).divide(2));
+		entrance.layoutYProperty().bind(mainMenu.heightProperty().subtract(entrance.prefHeight(-1)).divide(2));
+		paneMainMenu.getChildren().add(entrance);
 		
 		
 		
 		this.buttonStart = new Button("Start Game");
-		buttonStart.layoutXProperty().bind(mainMenu.widthProperty().subtract(buttonStart.prefWidth(-1)).divide(2).subtract(30));
-		buttonStart.layoutYProperty().bind(mainMenu.heightProperty().subtract(buttonStart.prefHeight(-1)).divide(2).subtract(150));
+		buttonStart.layoutXProperty().bind(mainMenu.widthProperty().subtract(buttonStart.prefWidth(-1)).divide(2).subtract(40));
+		buttonStart.layoutYProperty().bind(mainMenu.heightProperty().subtract(buttonStart.prefHeight(-1)).divide(2).subtract(30));
 		buttonStart.setMinHeight(50);
 		buttonStart.setMinWidth(80);
 		buttonStart.setFont(Font.font("Times New Roman", FontWeight.BOLD, FontPosture.REGULAR, 15));
@@ -163,8 +167,15 @@ public class Test extends Application {
 	   buttonMainMenu.setOnAction(e->switchScenes(mainMenu));
 	   paneYouWin.getChildren().add(buttonMainMenu);
 	   
+	   buttonMainMenu.layoutXProperty().bind(youWin.widthProperty().subtract(buttonMainMenu.prefWidth(-1)).divide(2).subtract(80));
+	   buttonMainMenu.layoutYProperty().bind(youWin.heightProperty().subtract(buttonMainMenu.prefHeight(-1)).divide(2).add(100));
+	   buttonMainMenu.setFont(Font.font("Times New Roman", FontWeight.BOLD, FontPosture.REGULAR, 15));
+		
+	   buttonMainMenu.setStyle(
+				"-fx-background-color: violet ;  -fx-text-fill: white;-fx-border-color: white; -fx-border-width: 2px;");
+	   
 	 //create background
-	 		BackgroundFill backgroundFill = new BackgroundFill(Color.OLIVE, new CornerRadii(0), new Insets(10));
+	 		BackgroundFill backgroundFill = new BackgroundFill(Color.ALICEBLUE, new CornerRadii(0), new Insets(10));
 	 		Background background = new Background(backgroundFill);
 	 		//set the background
 	 		paneYouWin.setBackground(background);
@@ -260,7 +271,7 @@ public class Test extends Application {
 		paneGameOver = new Pane();
         gameOver = new Scene(paneGameOver, 1200, 600);
 		//create background
-		BackgroundFill backgroundFill = new BackgroundFill(Color.BLACK, new CornerRadii(0), new Insets(10));
+		BackgroundFill backgroundFill = new BackgroundFill(Color.ALICEBLUE, new CornerRadii(0), new Insets(10));
 		Background background = new Background(backgroundFill);
 		//set the background
 		paneGameOver.setBackground(background);
@@ -280,14 +291,9 @@ public class Test extends Application {
 		gameOverText.layoutXProperty().bind(gameOver.widthProperty().subtract(gameOverText.prefWidth(-1)).divide(2));
 		gameOverText.layoutYProperty().bind(gameOver.heightProperty().subtract(gameOverText.prefHeight(-1)).divide(2));
 		wannaRetryText.layoutXProperty().bind(gameOver.widthProperty().subtract(wannaRetryText.prefWidth(-1)).divide(2));
-		wannaRetryText.layoutYProperty().bind(gameOver.heightProperty().subtract(wannaRetryText.prefHeight(-1)).divide(2).add(180));
+		wannaRetryText.layoutYProperty().bind(gameOver.heightProperty().subtract(wannaRetryText.prefHeight(-1)).divide(2).add(120));
 		
-		
-		
-		 
-		
-		
-		// gonna add return main menu and start over button here 
+		// return main menu and start over button 
 		buttonYes = new Button("Yes");
 		buttonYes.setOnAction(e->{
 			String s = "level" + levelCounter + ".txt";
@@ -316,7 +322,7 @@ public class Test extends Application {
 		});
 		
 		buttonYes.layoutXProperty().bind(gameOver.widthProperty().subtract(buttonYes.prefWidth(-1)).divide(2).subtract(50));
-		buttonYes.layoutYProperty().bind(gameOver.heightProperty().subtract(buttonYes.prefHeight(-1)).divide(2).add(200));
+		buttonYes.layoutYProperty().bind(gameOver.heightProperty().subtract(buttonYes.prefHeight(-1)).divide(2).add(140));
 		buttonYes.setFont(Font.font("Times New Roman", FontWeight.BOLD, FontPosture.REGULAR, 15));
 		buttonYes.setStyle(
 				"-fx-background-color: violet ;  -fx-text-fill: white;-fx-border-color: white; -fx-border-width: 2px;");
@@ -325,7 +331,7 @@ public class Test extends Application {
 		buttonNo.setOnAction(e->switchScenes(mainMenu));
 		
 		buttonNo.layoutXProperty().bind(gameOver.widthProperty().subtract(buttonNo.prefWidth(-1)).divide(2).add(20));
-		buttonNo.layoutYProperty().bind(gameOver.heightProperty().subtract(buttonNo.prefHeight(-1)).divide(2).add(200));
+		buttonNo.layoutYProperty().bind(gameOver.heightProperty().subtract(buttonNo.prefHeight(-1)).divide(2).add(140));
 		buttonNo.setFont(Font.font("Times New Roman", FontWeight.BOLD, FontPosture.REGULAR, 15));
 		
 		buttonNo.setStyle(
@@ -366,18 +372,23 @@ public class Test extends Application {
 				carXPositionLists.clear(); 
 				carYPositionLists.clear();
 				trafficLightLists.clear();
-				//result = 1;
 				level.setScore(0);
 				level.setCrashes(0);
-				levelCounter++;
-				switchScenes(nextLevel); 
+				if(levelCounter==5) {
+					levelCounter=1;
+					switchScenes(youWin) ;
+				}else {
+					levelCounter++;
+					switchScenes(nextLevel); 
+				}
+				
+				
 			}else if (level.getCrashes()==level.getAllowedAccidents()) {
 			    stop();
 			    carLists.clear();
 				carXPositionLists.clear(); 
 				carYPositionLists.clear();
 				trafficLightLists.clear();
-				//result = 0;
 				level.setScore(0);
 				level.setCrashes(0);
 				levelCounter =1;
@@ -411,23 +422,23 @@ public class Test extends Application {
 		// check crush statement
 		checkCarsInCrashState();
 		
+		
+		//check if they need to move
+		setOnMoving();
+		
 		//check if they need to stop
 		//check traffic light
 		checkForTrafficLights();
 		
-		//check the front car 
-		
+		 
+		//check the front car
 		checkFrontCar();
 		
 		//check the other car states
 		checkOtherCars();
 		
 		
-		//check if they need to move
-		setOnMoving();
 		
-		//check win lose condition
-		// winLoseCondition();
 		
 		//update the x y locations of cars (it must be the last)
 		uptadeXYLocations();
@@ -449,55 +460,122 @@ public class Test extends Application {
 	
 	public void setOnMoving() {
 		for(int i=0;i<carLists.size();i++) {
-			for (int j=0;j<carLists.get(i).size();j++) {
+			
+		if(!(carLists.get(i).isEmpty())) {	
+			if(carLists.get(i).get(0).getState().equals("stopped")) {
+				
+				boolean trafficLightDetectedWithinASafeDistance = false;
+							 if(!(level.getGroupedTrafficLightsList().get(i).isEmpty())) {
+								 
+							 for(int k=0;k<level.getGroupedTrafficLightsList().get(i).size();k++) {
+								//check the distance between the car and the light
+									Bounds bounds = carLists.get(i).get(0).getCar().getBoundsInLocal();
+							        Bounds screenBounds = carLists.get(i).get(0).getCar().localToScene(bounds);
+							        double x1 =  screenBounds.getCenterX();
+							        double y1 =  screenBounds.getCenterY();
+							        
+							        
+							        
+							        Bounds bounds1 = level.getGroupedTrafficLightsList().get(i).get(k).getCircle().getBoundsInLocal();
+							        Bounds screenBounds1 = level.getGroupedTrafficLightsList().get(i).get(k).getCircle().localToScene(bounds1);
+							        double x2 =  screenBounds1.getCenterX();
+							        double y2 =  screenBounds1.getCenterY();
+							        
+							        
+							        double distance = Math.sqrt((x1-x2)*(x1-x2)+(y1-y2)*(y1-y2));
+							        
+							        if(distance<this.distanceForSetOnMovingMethod) {
+							        	trafficLightDetectedWithinASafeDistance=true;
+									
+						            if(level.getGroupedTrafficLightsList().get(i).get(k).getState()) {
+						            	//System.out.println("Path ["+i+"] and its "+k+". traffic light is setted to green and 0. car is to go, distance:"+distance);
+								carLists.get(i).get(0).setState("moving");
+								carLists.get(i).get(0).getPt().play();
+								
+									break;
+									
+								} else if(!(level.getGroupedTrafficLightsList().get(i).get(k).getState())) {
+									//System.out.println("Breaking the loop in order maintain the pause of path ["+i+"] and its ["+0+".] car, at "+k+". light. Distance is:"+distance);
+									carLists.get(i).get(0).setRotate(carLists.get(i).get(0).getRotation());
+									break;
+								}else {
+									carLists.get(i).get(0).setRotate(carLists.get(i).get(0).getRotation());
+									
+								}
+						 }
+					}		
+							
+							} else {
+								carLists.get(i).get(0).setState("moving");
+								carLists.get(i).get(0).getPt().play();
+							}
+							 if(!(trafficLightDetectedWithinASafeDistance)) {
+								 
+								 if(carLists.get(i).get(0).getState().equals("stopped")) {
+										//System.out.println("Path ["+i+"] and its "+0+". car is to go because there are no traffic lights");
+										carLists.get(i).get(0).setState("moving");
+										carLists.get(i).get(0).getPt().play();
+									}
+								 
+							 }
+							
+				}
+			}			
+			for (int j=1;j<carLists.get(i).size();j++) {
 						
 						//check the front car
 						if(carLists.get(i).get(j).getState().equals("stopped")) {
 							
-							if(j!=0) {
-								
+							
+								//check the distance between the car and the light
+									Bounds bounds = carLists.get(i).get(j).getCar().getBoundsInLocal();
+							        Bounds screenBounds = carLists.get(i).get(j).getCar().localToScene(bounds);
+							        double x1 =  screenBounds.getCenterX();
+							        double y1 =  screenBounds.getCenterY();
+							     
+							        boolean trafficLightDetectedWithinASafeDistance=false;
+							        
+								if(!(level.getGroupedTrafficLightsList().get(i).isEmpty())) {
 								for(int k=0;k<level.getGroupedTrafficLightsList().get(i).size();k++) {
 									
-									
-						            if(carLists.get(i).get(j-1).getState().equals("moving")&&level.getGroupedTrafficLightsList().get(i).get(k).getState()) {
-								carLists.get(i).get(j).setState("moving");
-								carLists.get(i).get(j).getPt().play();
-									
-									
-								} else {
+							        Bounds bounds1 = level.getGroupedTrafficLightsList().get(i).get(k).getCircle().getBoundsInLocal();
+							        Bounds screenBounds1 = level.getGroupedTrafficLightsList().get(i).get(k).getCircle().localToScene(bounds1);
+							        double x2 =  screenBounds1.getCenterX();
+							        double y2 =  screenBounds1.getCenterY();
+							        
+							        
+							        double distance = Math.sqrt((x1-x2)*(x1-x2)+(y1-y2)*(y1-y2));
+							        
+									if(distance<this.distanceForSetOnMovingMethod) {
+										
+										trafficLightDetectedWithinASafeDistance=true;
+										
+										if(level.getGroupedTrafficLightsList().get(i).get(k).getState()) {
+											//System.out.println("Path ["+i+"] and its "+k+". traffic light is setted to green and "+j+". car is to go, distance:"+distance);
+											carLists.get(i).get(j).setState("moving");
+											carLists.get(i).get(j).getPt().play();
+										} else if(!(level.getGroupedTrafficLightsList().get(i).get(k).getState())) {
+											//System.out.println("Breaking the loop in order maintain the pause of path ["+i+"] and its ["+j+".] car, at "+k+". light. Distance is:"+distance);
+											carLists.get(i).get(j).setRotate(carLists.get(i).get(j).getRotation());
+											break;
+										}
+									} else {
 									carLists.get(i).get(j).setRotate(carLists.get(i).get(j).getRotation());
 								}
 								
-								 
+								 }
+								
 							}
-						
-						 }else {
-							 if(!(level.getGroupedTrafficLightsList().get(i).isEmpty())) {
-							 for(int k=0;k<level.getGroupedTrafficLightsList().get(i).size();k++) {
-									
-									
-						            if(level.getGroupedTrafficLightsList().get(i).get(k).getState()) {
-								carLists.get(i).get(j).setState("moving");
-								carLists.get(i).get(j).getPt().play();
-									
-									
-								} else {
-									carLists.get(i).get(j).setRotate(carLists.get(i).get(j).getRotation());
+								if(!(trafficLightDetectedWithinASafeDistance)) {
+								if(carLists.get(i).get(j-1).getState().equals("moving")) {
+									//System.out.println("Path ["+i+"] and its "+j+". car is to go because there are no traffic lights");
+									carLists.get(i).get(j).setState("moving");
+									carLists.get(i).get(j).getPt().play();
 								}
-						 }
-							
-							} else {
-								carLists.get(i).get(j).setState("moving");
-								carLists.get(i).get(j).getPt().play();
 							}
-							
-							
-						}
-						
-					}
-		
 				}
 		
+			}
 		}
 	}
 	
@@ -516,7 +594,7 @@ public class Test extends Application {
 						
 						for (int b=0;b<carLists.get(a).size();b++) {
 							
-							if(carLists.get(a).get(b).getState().equals("stopped")||carLists.get(a).get(b).getState().equals("crushed")) {
+							if(carLists.get(a).get(b).getState().equals("crushed")) {
 							
 							Bounds bounds = carLists.get(i).get(j).getCar().getBoundsInLocal();
 					        Bounds screenBounds = carLists.get(i).get(j).getCar().localToScene(bounds);
@@ -613,8 +691,6 @@ public class Test extends Application {
 					        double x1 =  screenBounds.getCenterX();
 					        double y1 =  screenBounds.getCenterY();
 					        
-					        double x3 = this.carXPositionLists.get(i).get(j);
-					        double y3 =this.carYPositionLists.get(i).get(j);
 					        
 					        Bounds bounds1 = level.getGroupedTrafficLightsList().get(i).get(k).getCircle().getBoundsInLocal();
 					        Bounds screenBounds1 = level.getGroupedTrafficLightsList().get(i).get(k).getCircle().localToScene(bounds1);
@@ -624,15 +700,15 @@ public class Test extends Application {
 					        
 					        double distance = Math.sqrt((x1-x2)*(x1-x2)+(y1-y2)*(y1-y2));
 							
-				            if (14<distance&&distance<this.safeLightDistance) {
+				            if (/*14<distance&&*/distance<this.safeLightDistance) {
 				            	
-				            	if((x1-x3>0&&x2-x1>0)||(x1-x3<0&&x2-x1<0)||(y1-y3>0&&y2-y1>0)||(y1-y3<0&&y2-y1<0)) {
-				            	
+				            	//if((x1-x3>0&&x2-x1>0)||(x1-x3<0&&x2-x1<0)||(y1-y3>0&&y2-y1>0)||(y1-y3<0&&y2-y1<0)) {
+				            	//System.out.println("Path ["+i+"] and its "+k+". traffic light is setted to red and "+j+". car is stopped");
 				            	carLists.get(i).get(j).setState("stopped");
 				            	carLists.get(i).get(j).setRotation(setRotateCar( i, j));
 								carLists.get(i).get(j).setRotate(carLists.get(i).get(j).getRotation());
 				            	carLists.get(i).get(j).getPt().pause();
-				            	}
+				            	//}
 				            }
 							
 							
@@ -847,11 +923,17 @@ public class Test extends Application {
 				Car car = new Car();
 				car.setState("moving");
 				car.getCar().setRotate(0);
-				
 				PathTransition pt = new PathTransition();
+				
+				
 				//sets the speed
 				double length = level.getPathLengths().get(pathNumber);
-			    pt.setDuration(Duration.millis((length/this.carSpeed)));
+				double durationInMillis = (length / this.carSpeed) ; // Convert seconds to milliseconds
+				pt.setDuration(Duration.millis(durationInMillis));
+			    //pt.setDuration(Duration.millis((length/this.carSpeed)));
+				
+				
+				
 			    //adds the path
 			    pt.setPath(level.getPaths().get(pathNumber)); //level.getPaths().get(pathNumber);
 			    //sets the car to the path
@@ -861,7 +943,6 @@ public class Test extends Application {
 			    pt.play();
 			    // removes the car when it has arrived at the end of the path
 			    pt.setOnFinished(e->{
-			    	
 			    	level.getPane().getChildren().remove(car.getCar());
 			    	if((!carLists.isEmpty())) {
 			    	carLists.get(pathNumber).remove(car);}
@@ -869,15 +950,12 @@ public class Test extends Application {
 				//add the car to the list of path its in
 			    carLists.get(pathNumber).add(car);
 			    car.setPt(pt);
-			    
 			    Bounds bounds = car.getCar().getBoundsInLocal();
 		        Bounds screenBounds = car.getCar().localToScene(bounds);
 		        double x =  screenBounds.getCenterX();
 		        double y =  screenBounds.getCenterY();
-		        
 			    carXPositionLists.get(pathNumber).add(x);
 			    carYPositionLists.get(pathNumber).add(y);
-			  
 			}
 
 		}
