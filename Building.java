@@ -11,7 +11,7 @@ public class Building {
 	private int colorIndex;
 	private int xCell ;
 	private int yCell ;
-	Color [] colorList = {Color.ORCHID ,Color.BLUEVIOLET, Color.LIGHTBLUE, Color.DARKBLUE};
+	Color [] colorList = {Color.FIREBRICK ,Color.LIGHTSEAGREEN, Color.BROWN, Color.YELLOWGREEN};
 	
 	
 	Building(int type, int rot, int color, int xCell,int yCell){
