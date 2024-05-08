@@ -48,8 +48,6 @@ public class Level {
 	//in order to calculate path length
 	private ArrayList<Double> firstXPositionLists = new ArrayList<Double>();
 	private ArrayList<Double> firstYPositionLists= new ArrayList<Double>();
-	private ArrayList<Double> XPositionLists = new ArrayList<Double>();
-	private ArrayList<Double> YPositionLists= new ArrayList<Double>();
 	private ArrayList<Double> pathLengths= new ArrayList<Double>();
 	
 	
@@ -148,9 +146,6 @@ public class Level {
 					firstXPositionLists.add(Integer.parseInt(array[1]),x);
 					firstYPositionLists.add(Integer.parseInt(array[1]),y);
 					
-					XPositionLists.add(Integer.parseInt(array[1]),x);
-					YPositionLists.add(Integer.parseInt(array[1]),y);
-
 					Path path = new Path();
 					
 					MoveTo moveTo = new MoveTo();
@@ -171,19 +166,6 @@ public class Level {
 					lineTo.setY(y);
 					
 					paths.get(Integer.parseInt(array[1])).getElements().add(lineTo);
-					
-					
-					//int lastIndex = paths.get(Integer.parseInt(array[1])).getElements().lastIndexOf(lineTo);
-					//to determine total lengths of paths
-					double x1 = XPositionLists.get(Integer.parseInt(array[1]));
-					double y1 = YPositionLists.get(Integer.parseInt(array[1]));
-					double totalLength=0;
-					if(!(pathLengths.isEmpty())) {
-					totalLength+=pathLengths.get(Integer.parseInt(array[1]));
-					pathLengths.remove(Integer.parseInt(array[1]));
-					}
-					totalLength+=Math.sqrt((x-x1)*(x-x1)+(y-y1)*(y-y1));
-					pathLengths.add(Integer.parseInt(array[1]),totalLength);
 					
 				}
 
@@ -330,14 +312,6 @@ public class Level {
 
 	public void setText1(Text text1) {
 		this.text1 = text1;
-	}
-
-	public void setXPositionLists(ArrayList<Double> xPositionLists) {
-		XPositionLists = xPositionLists;
-	}
-
-	public void setYPositionLists(ArrayList<Double> yPositionLists) {
-		YPositionLists = yPositionLists;
 	}
 
 	public void setTrafficLightsLists(ArrayList<ObservableList<TrafficLight>> trafficLightsLists) {
