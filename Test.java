@@ -2,6 +2,7 @@ import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.animation.AnimationTimer;
+import javafx.animation.Interpolator;
 import javafx.animation.PathTransition;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -11,6 +12,9 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.LineTo;
+import javafx.scene.shape.MoveTo;
+import javafx.scene.shape.Path;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.Image;
 import javafx.geometry.Insets;
@@ -25,10 +29,8 @@ public class Test extends Application {
 	private double safeCrushTime=200;
 	private double safeDistance = 30;
 	private double safeLightDistance = 20;
-	private int distanceForSetOnMovingMethod = 20;
 	private double crushDistance=20;
-	private double carSpeed=0.7;
-	private double standardDistance = 10.0;
+	private double carSpeed=100;
 	
 	private double time=0;
 	private Level level;
@@ -484,7 +486,7 @@ public class Test extends Application {
 							        
 							        double distance = Math.sqrt((x1-x2)*(x1-x2)+(y1-y2)*(y1-y2));
 							        
-							        if(distance<this.distanceForSetOnMovingMethod) {
+							        if(distance<this.safeLightDistance) {
 							        	trafficLightDetectedWithinASafeDistance=true;
 									
 						            if(level.getGroupedTrafficLightsList().get(i).get(k).getState()) {
@@ -546,7 +548,7 @@ public class Test extends Application {
 							        
 							        double distance = Math.sqrt((x1-x2)*(x1-x2)+(y1-y2)*(y1-y2));
 							        
-									if(distance<this.distanceForSetOnMovingMethod) {
+									if(distance<this.safeLightDistance) {
 										
 										trafficLightDetectedWithinASafeDistance=true;
 										
@@ -923,16 +925,13 @@ public class Test extends Application {
 				Car car = new Car();
 				car.setState("moving");
 				car.getCar().setRotate(0);
+				
+				
+				car.getCar().setTranslateX(((MoveTo)(level.getPaths().get(pathNumber).getElements().get(0))).getX());
+				car.getCar().setTranslateY(((MoveTo)(level.getPaths().get(pathNumber).getElements().get(0))).getY());
+				
+				
 				PathTransition pt = new PathTransition();
-				
-				
-				//sets the speed
-				double length = level.getPathLengths().get(pathNumber);
-				double durationInMillis = (length / this.carSpeed) ; // Convert seconds to milliseconds
-				pt.setDuration(Duration.millis(durationInMillis));
-			    //pt.setDuration(Duration.millis((length/this.carSpeed)));
-				
-				
 				
 			    //adds the path
 			    pt.setPath(level.getPaths().get(pathNumber)); //level.getPaths().get(pathNumber);
@@ -940,27 +939,64 @@ public class Test extends Application {
 			    pt.setNode(car.getCar());
 			    //adds car to the pane
 				level.getPane().getChildren().add(car.getCar());
-			    pt.play();
+				
+				//sets the speed
+				
+				double length =calculatePathLength(level.getPaths().get(pathNumber));
+				double durationInMillis = (((double)length)/ ((double)this.carSpeed)) ; 
+				pt.setDuration(Duration.seconds(durationInMillis));
+				
+				
+				pt.setInterpolator(Interpolator.LINEAR);
+				
+			    
 			    // removes the car when it has arrived at the end of the path
 			    pt.setOnFinished(e->{
 			    	level.getPane().getChildren().remove(car.getCar());
 			    	if((!carLists.isEmpty())) {
 			    	carLists.get(pathNumber).remove(car);}
 			    	level.upScore();level.removeText();level.setText();});
+			    
 				//add the car to the list of path its in
 			    carLists.get(pathNumber).add(car);
 			    car.setPt(pt);
+			    
+			    
+			    
 			    Bounds bounds = car.getCar().getBoundsInLocal();
 		        Bounds screenBounds = car.getCar().localToScene(bounds);
 		        double x =  screenBounds.getCenterX();
 		        double y =  screenBounds.getCenterY();
 			    carXPositionLists.get(pathNumber).add(x);
 			    carYPositionLists.get(pathNumber).add(y);
+			    
+			    
+			    pt.play();
 			}
 
 		}
 		
-		private boolean isCarSpawnPointFree(int pathNumber) {
+		public static double calculatePathLength(Path path) {
+	        double length = 0;
+	        for (int i = 0; i < path.getElements().size() - 1; i++) {
+	            if (path.getElements().get(i) instanceof MoveTo && path.getElements().get(i + 1) instanceof LineTo) {
+	                MoveTo move = (MoveTo) path.getElements().get(i);
+	                LineTo lineTo = (LineTo) path.getElements().get(i + 1);
+	                double deltaX = lineTo.getX() - move.getX();
+	                double deltaY = lineTo.getY() - move.getY();
+	                length += Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+	            } else if (path.getElements().get(i) instanceof LineTo && path.getElements().get(i + 1) instanceof LineTo) {
+	                LineTo line1 = (LineTo) path.getElements().get(i);
+	                LineTo line2 = (LineTo) path.getElements().get(i + 1);
+	                double deltaX = line2.getX() - line1.getX();
+	                double deltaY = line2.getY() - line1.getY();
+	                length += Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+	            }
+	        }
+	        return length;
+	    }
+		
+		public boolean isCarSpawnPointFree(int pathNumber) {
 			boolean isFree = true;
 			if(!(carLists.get(pathNumber).isEmpty())) {
 			Car car = carLists.get(pathNumber).get(carLists.get(pathNumber).size()-1);
