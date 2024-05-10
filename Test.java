@@ -72,6 +72,9 @@ public class Test extends Application {
 		youWin = createYouWin();
 		nextLevel = createNextLevel();
 		
+		Image icon = new Image("icon.jpg");
+		stage.getIcons().add(icon);
+		
 		primaryStage.setTitle("Traffic Game");
 
 		primaryStage.setScene(mainMenu);
@@ -98,26 +101,23 @@ public class Test extends Application {
 		
 		Image image = new Image("Entrance1.jpg");
 		
-		/*BackgroundImage backgroundImage = new BackgroundImage(
-				image,
-				BackgroundRepeat.NO_REPEAT,
-				BackgroundRepeat.NO_REPEAT,
-				BackgroundPosition.CENTER,
-				new BackgroundSize(100,100,true,true,true,true)
-				);
-		Background bg = new Background(backgroundImage);
-		paneMainMenu.setBackground(bg);*/
+		//create background
+ 		BackgroundFill backgroundFill = new BackgroundFill(Color.LAVENDER, new CornerRadii(0), new Insets(10));
+ 		Background background = new Background(backgroundFill);
+ 		//set the background
+ 		paneMainMenu.setBackground(background);
 		
 		
 		ImageView entrance = new ImageView(image);
 		entrance.setFitHeight(460);
 		entrance.setFitWidth(1380);
+		//binding entrance property so it will always stay at the center when window resized 
 		entrance.layoutXProperty().bind(mainMenu.widthProperty().subtract(entrance.prefWidth(-1)).divide(2));
 		entrance.layoutYProperty().bind(mainMenu.heightProperty().subtract(entrance.prefHeight(-1)).divide(2));
 		paneMainMenu.getChildren().add(entrance);
 		
 		
-		
+		//creating, designing and setting the start button
 		this.buttonStart = new Button("Start Game");
 		buttonStart.layoutXProperty().bind(mainMenu.widthProperty().subtract(buttonStart.prefWidth(-1)).divide(2).subtract(40));
 		buttonStart.layoutYProperty().bind(mainMenu.heightProperty().subtract(buttonStart.prefHeight(-1)).divide(2).subtract(30));
@@ -129,9 +129,13 @@ public class Test extends Application {
 		buttonStart.setOnAction(e -> {
 
 			String s = "level" + levelCounter + ".txt";
-
+			
+			
+            //create a new level object with specified file name
 			level = new Level(s);
 			
+			
+			//Initialize array lists
 			this.carLists= new ArrayList<ObservableList<Car>>();
 		 for(int i=0;i<level.getNumberOfPaths();i++) {
 			 carLists.add(FXCollections.observableArrayList());
@@ -149,8 +153,9 @@ public class Test extends Application {
 			 trafficLightLists.add(FXCollections.observableArrayList());
 		 }
 		
+		 //set the scene
 		 switchScenes(level.getScene());
-			
+			//starting the game
 			 gameplay();
 			 
 			 
@@ -366,7 +371,8 @@ public class Test extends Application {
 				update();
 				gameEnding();
 			}
-			
+		
+		//check the scores and decide win and lose
 		public void gameEnding() {
 			if(level.getScore()==level.getWinScore()) {
 				stop();
@@ -406,7 +412,7 @@ public class Test extends Application {
 		
 		
 	}
-
+	
 	private void update() {
 		
 		time += 0.16; 
@@ -416,12 +422,12 @@ public class Test extends Application {
 		// car movement - turning
 		setRotateAll();
 		
-		// car movement, crush and stop
+		
 		// check if there are crushes first
 		checkCrashes();
 		
 		
-		// check crush statement
+		// check cars in crash statement
 		checkCarsInCrashState();
 		
 		
@@ -436,7 +442,7 @@ public class Test extends Application {
 		//check the front car
 		checkFrontCar();
 		
-		//check the other car states
+		//check the other cars for a single car
 		checkOtherCars();
 		
 		
@@ -462,10 +468,10 @@ public class Test extends Application {
 	
 	public void setOnMoving() {
 		for(int i=0;i<carLists.size();i++) {
-			
+			//check if the list is empty
 		if(!(carLists.get(i).isEmpty())) {	
 			if(carLists.get(i).get(0).getState().equals("stopped")) {
-				
+				//check the first car on the path
 				boolean trafficLightDetectedWithinASafeDistance = false;
 							 if(!(level.getGroupedTrafficLightsList().get(i).isEmpty())) {
 								 
@@ -487,16 +493,16 @@ public class Test extends Application {
 							        double distance = Math.sqrt((x1-x2)*(x1-x2)+(y1-y2)*(y1-y2));
 							        
 							        if(distance<this.safeLightDistance) {
-							        	trafficLightDetectedWithinASafeDistance=true;
+							        	trafficLightDetectedWithinASafeDistance=true;//if there is a traffic light infront of a car, keep that information 
 									
-						            if(level.getGroupedTrafficLightsList().get(i).get(k).getState()) {
+						            if(level.getGroupedTrafficLightsList().get(i).get(k).getState()) {//check the state of the light, if its green go
 						            	//System.out.println("Path ["+i+"] and its "+k+". traffic light is setted to green and 0. car is to go, distance:"+distance);
 								carLists.get(i).get(0).setState("moving");
 								carLists.get(i).get(0).getPt().play();
 								
 									break;
 									
-								} else if(!(level.getGroupedTrafficLightsList().get(i).get(k).getState())) {
+								} else if(!(level.getGroupedTrafficLightsList().get(i).get(k).getState())) {//if the state of the light is red set rotation 
 									//System.out.println("Breaking the loop in order maintain the pause of path ["+i+"] and its ["+0+".] car, at "+k+". light. Distance is:"+distance);
 									carLists.get(i).get(0).setRotate(carLists.get(i).get(0).getRotation());
 									break;
@@ -507,11 +513,11 @@ public class Test extends Application {
 						 }
 					}		
 							
-							} else {
+							} else {//start moving if there is no traffic light on the path and 0. car stopped because of a crash
 								carLists.get(i).get(0).setState("moving");
 								carLists.get(i).get(0).getPt().play();
 							}
-							 if(!(trafficLightDetectedWithinASafeDistance)) {
+							 if(!(trafficLightDetectedWithinASafeDistance)) {//if the car didn't start to move but there is no traffic light infront of it, start moving
 								 
 								 if(carLists.get(i).get(0).getState().equals("stopped")) {
 										//System.out.println("Path ["+i+"] and its "+0+". car is to go because there are no traffic lights");
@@ -523,7 +529,7 @@ public class Test extends Application {
 							
 				}
 			}			
-			for (int j=1;j<carLists.get(i).size();j++) {
+			for (int j=1;j<carLists.get(i).size();j++) {//check the other car with same logic but also check if the car infront of them is moving 
 						
 						//check the front car
 						if(carLists.get(i).get(j).getState().equals("stopped")) {
@@ -550,13 +556,13 @@ public class Test extends Application {
 							        
 									if(distance<this.safeLightDistance) {
 										
-										trafficLightDetectedWithinASafeDistance=true;
+										trafficLightDetectedWithinASafeDistance=true;// set it true if there is a light infront of the car
 										
-										if(level.getGroupedTrafficLightsList().get(i).get(k).getState()) {
+										if(level.getGroupedTrafficLightsList().get(i).get(k).getState()) {// if the light is green,go
 											//System.out.println("Path ["+i+"] and its "+k+". traffic light is setted to green and "+j+". car is to go, distance:"+distance);
 											carLists.get(i).get(j).setState("moving");
 											carLists.get(i).get(j).getPt().play();
-										} else if(!(level.getGroupedTrafficLightsList().get(i).get(k).getState())) {
+										} else if(!(level.getGroupedTrafficLightsList().get(i).get(k).getState())) {//if light is red, dont do anything, just set the rotation
 											//System.out.println("Breaking the loop in order maintain the pause of path ["+i+"] and its ["+j+".] car, at "+k+". light. Distance is:"+distance);
 											carLists.get(i).get(j).setRotate(carLists.get(i).get(j).getRotation());
 											break;
@@ -568,8 +574,22 @@ public class Test extends Application {
 								 }
 								
 							}
+								//if the car didn't start to move but there is no traffic light infront of it, check the car before it and start moving if its moving
 								if(!(trafficLightDetectedWithinASafeDistance)) {
-								if(carLists.get(i).get(j-1).getState().equals("moving")) {
+									Bounds bounds3 = carLists.get(i).get(j).getCar().getBoundsInLocal();
+							        Bounds screenBounds3 = carLists.get(i).get(j).getCar().localToScene(bounds3);
+							        double x3 =  screenBounds3.getCenterX();
+							        double y3 =  screenBounds3.getCenterY();
+							        
+							        
+							        Bounds bounds1 = carLists.get(i).get(j-1).getCar().getBoundsInLocal();
+							        Bounds screenBounds1 = carLists.get(i).get(j-1).getCar().localToScene(bounds1);
+							        double x2 =  screenBounds1.getCenterX();
+							        double y2 =  screenBounds1.getCenterY();
+						            
+						            
+						            double distance2 = Math.sqrt((x3-x2)*(x3-x2)+(y3-y2)*(y3-y2));
+								if(carLists.get(i).get(j-1).getState().equals("moving")&&(distance2<this.safeDistance)) {
 									//System.out.println("Path ["+i+"] and its "+j+". car is to go because there are no traffic lights");
 									carLists.get(i).get(j).setState("moving");
 									carLists.get(i).get(j).getPt().play();
@@ -582,13 +602,14 @@ public class Test extends Application {
 	}
 	
 	public void checkOtherCars() {
+		//check all the cars one by one 
 		for(int i=0;i<carLists.size();i++) {
 			for (int j=0;j<carLists.get(i).size();j++) {
 				
 				boolean isBreak=false;
 				
 				if(carLists.get(i).get(j).getState().equals("moving")) {
-					
+					//for each car, check its situation with other cars in other paths, if they are distance is close with one of them and that are is crashed, stop the original car
 					for(int a=0;a<carLists.size();a++) {
 						if(a==i) {
 							continue;
@@ -596,7 +617,7 @@ public class Test extends Application {
 						
 						for (int b=0;b<carLists.get(a).size();b++) {
 							
-							if(carLists.get(a).get(b).getState().equals("crushed")) {
+							if(carLists.get(a).get(b).getState().equals("crushed")||carLists.get(a).get(b).getState().equals("stopped")) {
 							
 							Bounds bounds = carLists.get(i).get(j).getCar().getBoundsInLocal();
 					        Bounds screenBounds = carLists.get(i).get(j).getCar().localToScene(bounds);
@@ -638,6 +659,7 @@ public class Test extends Application {
 	}
 	
 	public void checkFrontCar() {
+		//check every car one by one, if its front car is in stopped state, stop the first car too
 		for(int i=0;i<carLists.size();i++) {
 			for (int j=1;j<carLists.get(i).size();j++) {
 				
@@ -645,7 +667,7 @@ public class Test extends Application {
 				
 				if(carLists.get(i).get(j).getState().equals("moving")) {
 					
-					if(carLists.get(i).get(j-1).getState().equals("stopped")||carLists.get(i).get(j-1).getState().equals("crushed")) {
+					if(carLists.get(i).get(j-1).getState().equals("stopped")) {
 						
 						//check the distance between the cars
 						Bounds bounds = carLists.get(i).get(j).getCar().getBoundsInLocal();
@@ -678,15 +700,16 @@ public class Test extends Application {
 	}
 	
 	public void checkForTrafficLights() {
+		//check all cars one by one
 		for(int i=0;i<carLists.size();i++) {
 			for (int j=0;j<carLists.get(i).size();j++) {
 				
 				if(carLists.get(i).get(j).getState().equals("moving")) {
 					
-					
+					//check the traffic lights on its path
 					for(int k=0;k<level.getGroupedTrafficLightsList().get(i).size();k++) {
 						
-						if(!(level.getGroupedTrafficLightsList().get(i).get(k).getState())) {
+						if(!(level.getGroupedTrafficLightsList().get(i).get(k).getState())) {//only check the distance if the light is red
 							//check the distance between the car and the light
 							Bounds bounds = carLists.get(i).get(j).getCar().getBoundsInLocal();
 					        Bounds screenBounds = carLists.get(i).get(j).getCar().localToScene(bounds);
@@ -728,6 +751,7 @@ public class Test extends Application {
 	}
 	
 	public void checkCarsInCrashState() {
+		//check all the cars one by one, if it is crashed check its crash time,remove from the scene if it high
 		for(int i=0;i<carLists.size();i++) {
 			for (int j=0;j<carLists.get(i).size();j++) {
 				if(carLists.get(i).get(j).getState().equals("crushed")) {
@@ -766,6 +790,7 @@ public class Test extends Application {
 	}
 	
 	public void checkCrashes() {
+		//check if there are any crashes
 		for(int i=0;i<carLists.size();i++) {
 			
 			for (int j=0;j<carLists.get(i).size();j++) {
@@ -918,15 +943,15 @@ public class Test extends Application {
 
 		private void spawnCar() {
 
-			int pathNumber = (int) (Math.random() * level.getNumberOfPaths());
+			int pathNumber = (int) (Math.random() * level.getNumberOfPaths());//generate random path number
 			
-			if (isCarSpawnPointFree(pathNumber)) {
+			if (isCarSpawnPointFree(pathNumber)) { //check if its free
 				
 				Car car = new Car();
 				car.setState("moving");
 				car.getCar().setRotate(0);
 				
-				
+				//set cars starting point equal to paths starting point
 				car.getCar().setTranslateX(((MoveTo)(level.getPaths().get(pathNumber).getElements().get(0))).getX());
 				car.getCar().setTranslateY(((MoveTo)(level.getPaths().get(pathNumber).getElements().get(0))).getY());
 				
@@ -998,6 +1023,8 @@ public class Test extends Application {
 		
 		public boolean isCarSpawnPointFree(int pathNumber) {
 			boolean isFree = true;
+			
+			//check distance between the last car on the paths and the paths starting point
 			if(!(carLists.get(pathNumber).isEmpty())) {
 			Car car = carLists.get(pathNumber).get(carLists.get(pathNumber).size()-1);
 			Bounds bounds = car.getCar().getBoundsInLocal();
