@@ -60,7 +60,8 @@ public class Test extends Application {
 	private Pane paneNextLevel;
 	private Button buttonNextLevel;
 	private Button buttonMainMenuforNextLevel;
-	
+
+		private Scene mapBuilder;
 
 	public void start(Stage primaryStage) {
 		
@@ -71,6 +72,7 @@ public class Test extends Application {
 		gameOver = createGameOver();
 		youWin = createYouWin();
 		nextLevel = createNextLevel();
+		mapBuilder = MapBuilder.createMapBuilder();
 		
 		Image icon = new Image("icon.jpg");
 		stage.getIcons().add(icon);
