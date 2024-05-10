@@ -1,4 +1,3 @@
-
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -32,17 +31,19 @@ import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 
-public class Main extends Application {
+public class MapBuilder extends Application {
 public static int selectedColor;
 public static Object selectedObject;
 public static int rotation;
 public static int unitWidth=800/15;
 public static int unitHeight= 800/15;
-public static boolean markersHidden;
-private static ObservableList<Building> buildings;
+public static boolean markersHidden=true;
+private static ObservableList<Building> buildings1;
 private static ObservableList<RoadTile> roadTiles;
-
-
+private static Marker startMarker;
+private Marker endMarker;
+static final ArrayList<Line> currentLine = new ArrayList<>();
+public static BorderPane pane;
 	public static void main(String[] args) {
 		launch(args);
 	}
@@ -50,7 +51,13 @@ private static ObservableList<RoadTile> roadTiles;
 	@Override
 	public void start(Stage stage) throws IOException,Exception {
 		
-		buildings = FXCollections.observableArrayList();
+stage.setScene(createMapBuilder());
+stage.show();
+	
+}
+	public static Scene createMapBuilder() {
+
+		buildings1 = FXCollections.observableArrayList();
 		roadTiles = FXCollections.observableArrayList();
     //File
 	
@@ -116,8 +123,9 @@ private static ObservableList<RoadTile> roadTiles;
 	    clearBt.setText("Clear Map");
 	    clearBt.setTextFill(Color.WHITE);
 	    clearBt.setBackground(bg);
+	    
 	     Button hideMarkersBt= new Button();
-	     hideMarkersBt.setText("Hide Markers");
+	     hideMarkersBt.setText("Build Paths");
 	     hideMarkersBt.setTextFill(Color.WHITE);
 	     hideMarkersBt.setBackground(bg);
 	    
@@ -191,10 +199,7 @@ private static ObservableList<RoadTile> roadTiles;
 	  
 	    //ITEM SELECTING CATALOGUE (ITEMS PANE)
 	   
-	    typeZero.addMarkers();
-	    typeOne.addMarkers();
-	    typeTwo.addMarkers();
-	    typeThree.addMarkers();
+	   
 	    buildings.getChildren().addAll(stack(type0),stack(type1));
 	   buildings.setAlignment(Pos.CENTER_LEFT);
 	   items.getChildren().addAll(colors,rotateBt,clearBt,saveMapBt,hideMarkersBt,stack(tlight),buildings,stack(type2));
@@ -285,6 +290,7 @@ private static ObservableList<RoadTile> roadTiles;
 		       roadTiles2.setAlignment(Pos.CENTER);
 			   items.getChildren().addAll(roadTiles1,roadTiles2);
 	    	 
+	  
 	  	   
 	  	    
 	    
@@ -293,6 +299,10 @@ private static ObservableList<RoadTile> roadTiles;
 	   //MAP CLEARING
 	   clearBt.setOnMouseClicked(me ->{
 		   metaData.getChildren().clear();
+		   buildings1.clear();
+		    roadTiles.clear();
+		   
+		   
 		   
 		    for(int i =1; (800/15)*i<800;i++) {
 		        Line line = new Line(i*(800/15),0,i*(800/15),800);
@@ -313,7 +323,10 @@ private static ObservableList<RoadTile> roadTiles;
 	   hideMarkersBt.setOnMouseClicked(me->{
 		  if( hideMarkersBt.getText().equals("Hide Markers")) {
 			  markersHidden =true;
-			  hideMarkersBt.setText("Show Markers");
+				TrafficLight newtLight =rotateTrafficLight(tlight);
+				
+		         
+			  hideMarkersBt.setText("Build Paths");
 			  		items.getChildren().clear();
 			  		roadTiles1.getChildren().clear();
 			  		roadTiles2.getChildren().clear();
@@ -337,8 +350,10 @@ private static ObservableList<RoadTile> roadTiles;
 			  
 			  
 		  }
-		  else if(hideMarkersBt.getText().equals("Show Markers")) {
+		  else if(hideMarkersBt.getText().equals("Build Paths")) {
 			  hideMarkersBt.setText("Hide Markers");
+			  selectedObject=null;
+			 
 			  markersHidden =false;
 			  
 			  		items.getChildren().clear();
@@ -346,20 +361,22 @@ private static ObservableList<RoadTile> roadTiles;
 			  		roadTiles2.getChildren().clear();
 			  		buildings.getChildren().clear();
 			  		
+			  		
+			  		
 		            typeZero.addMarkers();
 	            	typeOne.addMarkers();
 		            typeTwo.addMarkers();
 		            typeThree.addMarkers();
 		            
-			   buildings.getChildren().addAll(stack(type0),stack(type1));
-			   buildings.setAlignment(Pos.CENTER_LEFT);
-			   items.getChildren().addAll(colors,rotateBt,clearBt,saveMapBt,hideMarkersBt,tlight.getPane(),buildings,stack(type2));
-			   roadTiles1.getChildren().addAll(typeZero.getPane(),typeOne.getPane());
-			   roadTiles1.setAlignment(Pos.CENTER);
-		       roadTiles2.getChildren().addAll(typeTwo.getPane(),typeThree.getPane());
-		       roadTiles2.setAlignment(Pos.CENTER);
-			   items.getChildren().addAll(roadTiles1,roadTiles2);
-			   reAddPaneMarkers(metaData);
+		               buildings.getChildren().addAll(stack(type0),stack(type1));
+					   buildings.setAlignment(Pos.CENTER_LEFT);
+					   items.getChildren().addAll(colors,rotateBt,clearBt,saveMapBt,hideMarkersBt,tlight.getPane(),buildings,stack(type2));
+					   roadTiles1.getChildren().addAll(typeZero.getPane(),typeOne.getPane());
+					   roadTiles1.setAlignment(Pos.CENTER);
+				       roadTiles2.getChildren().addAll(typeTwo.getPane(),typeThree.getPane());
+				       roadTiles2.setAlignment(Pos.CENTER);
+					   items.getChildren().addAll(roadTiles1,roadTiles2);
+					   reAddPaneMarkers(metaData);
 			  
 			  
 		  }
@@ -387,8 +404,6 @@ private static ObservableList<RoadTile> roadTiles;
     }
       
     }
-   
-
   
     //Background and alignment adjustments
 
@@ -415,15 +430,77 @@ private static ObservableList<RoadTile> roadTiles;
 	
     Scene scene = new Scene (pane,1200,800);
     
-    stage.setScene(scene);
-		stage.show();
+   return scene;
 	
-	    
 	}
 
 
-	private void handleClick(Object o, MouseEvent event, Pane pane) {
-		
+	private static void handleClick(Object o, MouseEvent event, Pane pane) {
+		if(selectedObject==null) {
+			if(event.getTarget() instanceof Circle) {
+		 Circle clickedCircle = (Circle) event.getTarget();
+	        boolean[] linePathCheck = new boolean[2];
+	        linePathCheck[0] = true; // line check
+	        linePathCheck[1] = false; // path check
+	        double[] coordinates = {Double.NaN, Double.NaN}; // Initialize with NaN
+
+	        // Iterate through buildings and roadTiles to find the clicked marker
+	        for (Building building : buildings1) {
+	            for (int i=0;i<building.getHeaderMarkers().size();i++) {
+	            	Marker marker =building.getHeaderMarkers().get(i);
+	            	
+	                if (clickedCircle.equals(marker.getCircle())) {
+	                    System.out.println("HeaderMarker clicked");
+	                    marker.getCircle().setOnMouseClicked(me -> {
+	                        if (!linePathCheck[1]) {
+	                            coordinates[0] = marker.getCenterX();
+	                            coordinates[1] = marker.getCenterY();
+	                            linePathCheck[1] = true;
+	                        } else {
+	                            // If another HeaderMarker is clicked, start a new series of lines
+	                            linePathCheck[1] = false;
+	                            coordinates[0] = marker.getCenterX();
+	                            coordinates[1] = marker.getCenterY();
+	                            currentLine.clear(); // Clear the current line array
+	                        }
+	                    });
+	                    return;
+	                }
+	            }
+	        }
+
+	        for (RoadTile roadTile : roadTiles) {
+	            for (int i=0;i<roadTile.getMarkers().size();i++) {
+	            	Marker marker=roadTile.getMarkers().get(i);
+	                if (clickedCircle.equals(marker.getCircle())) {
+	                    System.out.println("Marker clicked");
+	                    if (!Double.isNaN(coordinates[0]) && !Double.isNaN(coordinates[1])) {
+	                        // Create a line from the stored coordinates to the clicked Marker
+	                        Line line = new Line(coordinates[0], coordinates[1],
+	                                marker.getCenterX(), marker.getCenterY());
+
+	                        // Bind the end point of the line to the mouse
+	                        pane.setOnMouseReleased(me -> {
+	                            if (marker != null) {
+	                                line.setEndX(me.getX());
+	                                line.setEndY(me.getY());
+	                            }
+	                        });
+
+	                        // Set the line in the array
+	                        currentLine.add(line);
+
+	                        // Add the line to the pane
+	                        pane.getChildren().add(line);
+	                    }
+	                    // Update startMarker
+	                    startMarker = marker;
+	                }
+	            }
+	        }
+	    
+		}
+		}
 	    if (selectedObject != null ) {
 	    	
 	        double x = event.getX();
@@ -453,7 +530,7 @@ private static ObservableList<RoadTile> roadTiles;
 	        if (selectedObject instanceof Building) {
 	        	
 	            Building building = (Building) selectedObject;
-	          
+	         
 	            Building newBuilding = new Building(building.getType(), rotation, selectedColor, (int) (x / unitWidth), (int) (y / unitHeight));	   
 	             if(!markersHidden) {
 	            newBuilding.addHeaderMarker();
@@ -465,8 +542,9 @@ private static ObservableList<RoadTile> roadTiles;
 	             
 	            pane.getChildren().add(newBuilding.getPane());
 	            
-	            buildings.add(newBuilding);
+	            buildings1.add(newBuilding);
 	            
+	           
 	        }  if (selectedObject instanceof RoadTile) {
 
 	            RoadTile roadTile = (RoadTile) selectedObject;
@@ -488,10 +566,11 @@ private static ObservableList<RoadTile> roadTiles;
 	        
 	    }
 	}
+	
 
 
 	
-	public Pane stack(Object o) {
+	public static Pane stack(Object o) {
 		
 	    Pane stackPane = new Pane();
        
@@ -565,26 +644,27 @@ else if(markersHidden==true) {
           
           return stackPane;
   }
+	 } else if (o instanceof TrafficLight) {
+		    TrafficLight tLight = (TrafficLight) o;
+		    
+		    stackPane.getChildren().addAll(tLight.getPane());
+		    
+		} 
+		else if (o instanceof RoadTile) {
+
+		    RoadTile roadTile= (RoadTile)o;
+		    roadTile.removeMarkers();
+		    stackPane.getChildren().add(roadTile.getPane());
+
+			return stackPane;
+
+			
+			
+
+		}
 	 }
 
-} else if (o instanceof TrafficLight) {
-    TrafficLight tLight = (TrafficLight) o;
-    tLight.getCircle().setRadius(15);
-    stackPane.getChildren().addAll(tLight.getPane());
-    
-} 
-else if (o instanceof RoadTile) {
 
-    RoadTile roadTile= (RoadTile)o;
-    roadTile.removeMarkers();
-    stackPane.getChildren().add(roadTile.getPane());
-
-	return stackPane;
-
-	
-	
-
-}
 	
 	
 
@@ -601,7 +681,7 @@ else if (o instanceof RoadTile) {
 	
 			double half = (tLight.getX2()-tLight.getX1())/2;
 			double newX= (tLight.getX1()+tLight.getX2())/2;
-			Line line = new Line(newX,tLight.getY1()-half,newX,tLight.getY1()+half);
+		
 			newTLight = new TrafficLight(newX,tLight.getY1()-half,newX,tLight.getY1()+half);
 			newTLight.getCircle().setOnMouseClicked(me->{
 				newTLight.getCircle().setStroke(Color.RED);
@@ -618,12 +698,12 @@ else if (o instanceof RoadTile) {
 	}
 	
 	public static void deletePaneMarkers(Pane pane) {
-		if(!buildings.isEmpty())
-		for(int i=0; i<buildings.size();i++) {
-			pane.getChildren().remove(buildings.get(i).getPane());
-			if(buildings.get(i).getHeaderMarkers()!=null)
-			buildings.get(i).removeHeaderMarkers();
-			pane.getChildren().add(buildings.get(i).getPane());
+		if(!buildings1.isEmpty())
+		for(int i=0; i<buildings1.size();i++) {
+			pane.getChildren().remove(buildings1.get(i).getPane());
+			if(buildings1.get(i).getHeaderMarkers()!=null)
+			buildings1.get(i).removeHeaderMarkers();
+			pane.getChildren().add(buildings1.get(i).getPane());
 		}
 		if(!roadTiles.isEmpty())
 		for(int i=0; i<roadTiles.size();i++) {
@@ -638,12 +718,12 @@ else if (o instanceof RoadTile) {
 
 	public static void reAddPaneMarkers(Pane pane) {
 		
-		if(!buildings.isEmpty())
-		for(int i=0; i<buildings.size();i++) {
-			pane.getChildren().remove(buildings.get(i).getPane());
-			buildings.get(i).addHeaderMarker();
-			buildings.get(i).updateMarkerPositions();
-			pane.getChildren().add(buildings.get(i).getPane());
+		if(!buildings1.isEmpty())
+		for(int i=0; i<buildings1.size();i++) {
+			pane.getChildren().remove(buildings1.get(i).getPane());
+			buildings1.get(i).addHeaderMarker();
+			buildings1.get(i).updateMarkerPositions();
+			pane.getChildren().add(buildings1.get(i).getPane());
 			
 		}
 		
@@ -656,25 +736,17 @@ else if (o instanceof RoadTile) {
 			pane.getChildren().add(roadTiles.get(i).getPane());
 		}
 		
+	
+	
 	}
-	
-
-	public static void instantiate (Pane pane) {
-		
-			for(int i=0; i<buildings.size();i++) {
-				if(!buildings.get(i).getHeaderMarkers().isEmpty())
-					for( int j=0; j<buildings.size();j++) {
-						buildings.get(i).getHeaderMarkers().get(j).handleMouseClick(pane);
-						
-						
-					}
-				
-			}
-	
-
 }
 
-}
+
+
+
+
+
+
 
 
 
