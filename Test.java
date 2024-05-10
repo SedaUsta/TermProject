@@ -60,9 +60,10 @@ public class Test extends Application {
 	private Pane paneNextLevel;
 	private Button buttonNextLevel;
 	private Button buttonMainMenuforNextLevel;
-
-		private Scene mapBuilder;
-
+	
+	private Scene mapBuilder;
+	private Button mapBuilderBt;
+	
 	public void start(Stage primaryStage) {
 		
 		stage = primaryStage;
@@ -72,11 +73,11 @@ public class Test extends Application {
 		gameOver = createGameOver();
 		youWin = createYouWin();
 		nextLevel = createNextLevel();
-		mapBuilder = MapBuilder.createMapBuilder();
+		mapBuilder= MapBuilder.createMapBuilder();
 		
-		Image icon = new Image("icon.jpg");
+		/*Image icon = new Image("icon.jpg");
 		stage.getIcons().add(icon);
-		
+		*/
 		primaryStage.setTitle("Traffic Game");
 
 		primaryStage.setScene(mainMenu);
@@ -101,7 +102,7 @@ public class Test extends Application {
 		mainMenu = new Scene(paneMainMenu,1380,460);
 		
 		
-		Image image = new Image("Entrance1.jpg");
+		Image image = new Image("");
 		
 		//create background
  		BackgroundFill backgroundFill = new BackgroundFill(Color.LAVENDER, new CornerRadii(0), new Insets(10));
@@ -120,6 +121,21 @@ public class Test extends Application {
 		
 		
 		//creating, designing and setting the start button
+		this.mapBuilderBt = new Button("Map Builder");
+		mapBuilderBt.layoutXProperty().bind(mainMenu.widthProperty().subtract(mapBuilderBt.prefWidth(-1)).divide(2).subtract(40));
+		mapBuilderBt.layoutYProperty().bind(mainMenu.heightProperty().add(mapBuilderBt.prefHeight(-1)).divide(2).subtract(30));
+		mapBuilderBt.setMinHeight(50);
+		mapBuilderBt.setMinWidth(80);
+		mapBuilderBt.setFont(Font.font("Times New Roman", FontWeight.BOLD, FontPosture.REGULAR, 15));
+		mapBuilderBt.setStyle(
+				"-fx-background-color: violet ;  -fx-text-fill: white;-fx-border-color: white; -fx-border-width: 2px;");
+		mapBuilderBt.setOnAction(e -> {
+			switchScenes(mapBuilder);
+			
+		});
+		paneMainMenu.getChildren().add(mapBuilderBt);
+		
+		
 		this.buttonStart = new Button("Start Game");
 		buttonStart.layoutXProperty().bind(mainMenu.widthProperty().subtract(buttonStart.prefWidth(-1)).divide(2).subtract(40));
 		buttonStart.layoutYProperty().bind(mainMenu.heightProperty().subtract(buttonStart.prefHeight(-1)).divide(2).subtract(30));
